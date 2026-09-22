@@ -16,6 +16,7 @@ In distributed computing, direct client-to-client communication can become compl
 
 ## 3. System Architecture & Flow
 
+```text
               ┌──────────────────────┐
               │     TCP SERVER       │
               │                      │
@@ -36,9 +37,11 @@ In distributed computing, direct client-to-client communication can become compl
                     └─────────►│  Client C │
                                │  Priya    │
                                └───────────┘
+```
 
 ### Complete Execution Flow:
 
+```text
                   START SERVER
                        │
                        ↓
@@ -91,19 +94,22 @@ In distributed computing, direct client-to-client communication can become compl
                      │
                      ↓
                 Close socket
+```
 
 ---
 
 ## 4. Key Goals & Learning Objectives
-- Socket Programming: Master socket(), bind(), listen(), accept(), connect(), send(), and recv().
-- Concurrency & Threads: Utilize POSIX Threads (pthread) to handle simultaneous client connections.
-- Synchronization: Prevent race conditions on the shared client list using mutexes (pthread_mutex_t).
-- Signal Handling: Handle SIGINT (Ctrl+C) for graceful server deallocation and resource cleanup.
-- File I/O: Implement persistent server-side chat event logging into logs/chat.log.
+- **Socket Programming:** Master `socket()`, `bind()`, `listen()`, `accept()`, `connect()`, `send()`, and `recv()`.
+- **Concurrency & Threads:** Utilize POSIX Threads (`pthread`) to handle simultaneous client connections.
+- **Synchronization:** Prevent race conditions on the shared client list using mutexes (`pthread_mutex_t`).
+- **Signal Handling:** Handle `SIGINT` (Ctrl+C) for graceful server deallocation and resource cleanup.
+- **File I/O:** Implement persistent server-side chat event logging into `logs/chat.log`.
 
 ---
 
 ## 5. Directory Structure
+
+```text
 tcp-chat/
 ├── src/            # Implementation files (.c)
 ├── include/        # Header files (.h)
@@ -112,6 +118,7 @@ tcp-chat/
 ├── .gitignore      # Ignored binaries and build artifacts
 ├── LICENSE         # MIT License
 └── README.md       # Project proposal and documentation
+```
 
 ---
 
@@ -123,18 +130,24 @@ tcp-chat/
 - Make utility
 
 ### Compilation
+```bash
 make
+```
 
 ### Running the Server
+```bash
 ./bin/server 8080
+```
 
 ### Running a Client
+```bash
 ./bin/client 127.0.0.1 8080
+```
 
 ---
 
 ## 7. Supported Commands
-- /help : List all available commands.
-- /users : Display all currently online users.
-- /msg <user> <message> : Send a private message to a specific user.
-- /quit : Disconnect cleanly from the server.
+- `/help` : List all available commands.
+- `/users` : Display all currently online users.
+- `/msg <user> <message>` : Send a private message to a specific user.
+- `/quit` : Disconnect cleanly from the server.
