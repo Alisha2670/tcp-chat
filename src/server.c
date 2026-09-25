@@ -5,6 +5,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#define BUFFER_SIZE 1024
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <port>\n", argv[0]);
@@ -16,6 +18,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);
     int opt = 1;
+    char buffer[BUFFER_SIZE];
 
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) {
@@ -59,9 +62,25 @@ int main(int argc, char *argv[]) {
     inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
     printf("[+] Client connected from %s:%d\n", client_ip, ntohs(client_addr.sin_port));
 
+    while (1) {
+        memset(buffer, 0, sizeof(buffer));
+        ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+
+        if (bytes_received > 0) {
+            buffer[bytes_received] = '\0';
+            printf("[%s:%d]: %s\n", client_ip, ntohs(client_addr.sin_port), buffer);
+        } else if (bytes_received == 0) {
+            printf("[-] Client %s:%d disconnected.\n", client_ip, ntohs(client_addr.sin_port));
+            break;
+        } else {
+            perror("recv");
+            break;
+        }
+    }
+
     close(client_fd);
     close(server_fd);
-    printf("[*] Connection closed.\n");
+    printf("[*] Server shut down cleanly.\n");
 
     return EXIT_SUCCESS;
 }

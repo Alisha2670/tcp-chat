@@ -5,6 +5,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#define BUFFER_SIZE 1024
+
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <server_ip> <port>\n", argv[0]);
@@ -15,6 +17,7 @@ int main(int argc, char *argv[]) {
     int port = atoi(argv[2]);
     int sock_fd;
     struct sockaddr_in server_addr;
+    char buffer[BUFFER_SIZE];
 
     sock_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (sock_fd < 0) {
@@ -40,7 +43,32 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    printf("[+] Successfully connected to %s:%d\n", server_ip, port);
+    printf("[+] Connected to server! Type messages below (type 'exit' to quit):\n");
+
+    while (1) {
+        printf("> ");
+        fflush(stdout);
+
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+            break;
+        }
+
+        buffer[strcspn(buffer, "\n")] = '\0';
+
+        if (strlen(buffer) == 0) {
+            continue;
+        }
+
+        if (strcmp(buffer, "exit") == 0) {
+            printf("[*] Exiting chat...\n");
+            break;
+        }
+
+        if (send(sock_fd, buffer, strlen(buffer), 0) < 0) {
+            perror("send");
+            break;
+        }
+    }
 
     close(sock_fd);
     printf("[*] Disconnected.\n");
