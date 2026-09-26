@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 
 #define BUFFER_SIZE 1024
+#define USERNAME_LEN 32
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -19,6 +20,7 @@ int main(int argc, char *argv[]) {
     socklen_t client_len = sizeof(client_addr);
     int opt = 1;
     char buffer[BUFFER_SIZE];
+    char username[USERNAME_LEN];
 
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd < 0) {
@@ -60,7 +62,17 @@ int main(int argc, char *argv[]) {
 
     char client_ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
-    printf("[+] Client connected from %s:%d\n", client_ip, ntohs(client_addr.sin_port));
+
+    memset(username, 0, sizeof(username));
+    ssize_t user_bytes = recv(client_fd, username, sizeof(username) - 1, 0);
+    if (user_bytes <= 0) {
+        close(client_fd);
+        close(server_fd);
+        return EXIT_FAILURE;
+    }
+    username[user_bytes] = '\0';
+
+    printf("[+] %s has joined the chat! (%s:%d)\n", username, client_ip, ntohs(client_addr.sin_port));
 
     while (1) {
         memset(buffer, 0, sizeof(buffer));
@@ -68,9 +80,9 @@ int main(int argc, char *argv[]) {
 
         if (bytes_received > 0) {
             buffer[bytes_received] = '\0';
-            printf("[%s:%d]: %s\n", client_ip, ntohs(client_addr.sin_port), buffer);
+            printf("[%s]: %s\n", username, buffer);
         } else if (bytes_received == 0) {
-            printf("[-] Client %s:%d disconnected.\n", client_ip, ntohs(client_addr.sin_port));
+            printf("[-] %s has left the chat.\n", username);
             break;
         } else {
             perror("recv");

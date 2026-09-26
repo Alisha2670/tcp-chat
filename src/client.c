@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 
 #define BUFFER_SIZE 1024
+#define USERNAME_LEN 32
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
@@ -18,6 +19,7 @@ int main(int argc, char *argv[]) {
     int sock_fd;
     struct sockaddr_in server_addr;
     char buffer[BUFFER_SIZE];
+    char username[USERNAME_LEN];
 
     sock_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (sock_fd < 0) {
@@ -43,7 +45,32 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    printf("[+] Connected to server! Type messages below (type 'exit' to quit):\n");
+    printf("[+] Connected to server!\n");
+
+    while (1) {
+        printf("Enter your username: ");
+        fflush(stdout);
+
+        if (fgets(username, sizeof(username), stdin) == NULL) {
+            close(sock_fd);
+            return EXIT_FAILURE;
+        }
+
+        username[strcspn(username, "\n")] = '\0';
+
+        if (strlen(username) > 0) {
+            break;
+        }
+        printf("Username cannot be empty. Please try again.\n");
+    }
+
+    if (send(sock_fd, username, strlen(username), 0) < 0) {
+        perror("send username");
+        close(sock_fd);
+        return EXIT_FAILURE;
+    }
+
+    printf("[+] Registered as '%s'. Type messages below (type 'exit' to quit):\n", username);
 
     while (1) {
         printf("> ");
